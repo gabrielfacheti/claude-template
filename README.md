@@ -1,4 +1,4 @@
-# Template `.claude` para Ciência de Dados (consultoria)
+# Template `.claude` para Ciência de Dados
 
 Um kit padrão para trabalhar do mesmo jeito em projetos diferentes. A cada projeto
 novo você copia esta pasta, **edita só o `CLAUDE.md`**, e o resto (padrões de código,
