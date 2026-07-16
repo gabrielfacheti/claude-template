@@ -1,0 +1,57 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# --- Ambientes ---
+.venv/
+venv/
+env/
+.python-version
+
+# --- Segredos & credenciais ---
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+secrets/
+
+# --- Configs locais do Claude Code ---
+.claude/settings.local.json
+
+# --- Dados ---
+data/raw/*
+data/interim/*
+data/processed/*
+!data/**/.gitkeep
+
+# --- Artefatos de modelo & experimentos ---
+*.pkl
+*.joblib
+*.h5
+*.onnx
+/models/
+mlruns/
+.mlflow/
+
+# --- Notebooks: checkpoints (o output é limpo via nbstripout) ---
+.ipynb_checkpoints/
+
+# --- Relatórios gerados ---
+reports/figures/*
+!reports/figures/.gitkeep
+
+# --- Ferramentas / cache ---
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# --- SO / IDE ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
