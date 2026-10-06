@@ -77,12 +77,18 @@ Princípios rápidos; o detalhe está nas *rules* importadas abaixo.
    dados rastreáveis. (Nelson, cap. 10)
 6. **Explique a decisão, não só o número.** O cliente precisa entender o "e daí?".
    (Huyen, cap. 2 · Nelson, cap. 9)
+7. **Cada tarefa no seu tier.** Opus lidera e decide; Sonnet executa o que é
+   verificável; Haiku faz o mecânico. O critério não é só esforço — é também o
+   **custo do erro**: se ele passa em silêncio para o entregável, não é tarefa
+   de modelo barato. Ver `80-roteamento.md`.
 
 ### Fluxo padrão de um projeto
 
 Use o comando `/novo-projeto` para criar a estrutura de pastas. Depois, o caminho
 típico é: `/eda` → definir baseline com `/baseline` → iterar modelo → `/revisar`
 antes de entregar → `/model-card` para documentar → `/handoff` para o cliente.
+Em dúvida sobre quem deveria fazer uma tarefa, `/rota <tarefa>` mostra a
+classificação e o despacho sem executar nada.
 
 ---
 
@@ -101,6 +107,7 @@ antes de entregar → `/model-card` para documentar → `/handoff` para o client
 @.claude/rules/50-reprodutibilidade.md
 @.claude/rules/60-git-workflow.md
 @.claude/rules/70-comunicacao.md
+@.claude/rules/80-roteamento.md
 
 ---
 

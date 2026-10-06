@@ -34,5 +34,18 @@
   },
   "env": {
     "PYTHONHASHSEED": "42"
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "${CLAUDE_PROJECT_DIR}/.claude/hooks/routing-reminder.sh",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }

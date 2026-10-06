@@ -28,7 +28,8 @@ Scientists_** (artesanato de software aplicado à DS).
 | **`agents/`** | Subagentes especialistas que o Claude delega sozinho. | Não. |
 | **`skills/`** | Procedimentos que o Claude carrega sob demanda p/ uma tarefa. | Não. |
 | **`commands/`** | Atalhos `/comando` que você dispara. | Não. |
-| **`settings.json`** | Permissões e ambiente da sessão. | Raramente. |
+| **`settings.json`** | Permissões, ambiente e registro dos hooks. | Raramente. |
+| **`hooks/`** | Scripts que o Claude Code roda em eventos da sessão. | Não. |
 
 > **Rules vs. agents vs. skills** (a dúvida comum):
 > *rule* é uma **norma sempre ativa** (carregada via `@import` no `CLAUDE.md`);
@@ -43,10 +44,11 @@ Scientists_** (artesanato de software aplicado à DS).
 ├── README.md                 # este arquivo
 ├── settings.json             # permissões + env (PYTHONHASHSEED)
 ├── settings.local.json.example  # copie p/ settings.local.json (pessoal, git-ignored)
-├── rules/                    # 8 normas sempre ativas
-├── agents/                   # 6 subagentes
+├── rules/                    # 9 normas sempre ativas
+├── hooks/                    # routing-reminder.sh (injeta o router a cada turno)
+├── agents/                   # 9 subagentes (3 haiku · 3 sonnet · 3 opus)
 ├── skills/                   # 6 skills (+ template de model card)
-└── commands/                 # 6 slash commands
+└── commands/                 # 7 slash commands
 ```
 
 ## Rules (normas)
@@ -61,17 +63,21 @@ Scientists_** (artesanato de software aplicado à DS).
 | `50-reprodutibilidade.md` | Ambiente travado, seeds, `raw` imutável, pipeline determinístico. |
 | `60-git-workflow.md` | Commits, PRs, pre-commit, o que nunca versionar. |
 | `70-comunicacao.md` | BLUF, incerteza, visualização, documentação, handoff. |
+| `80-roteamento.md` | **Router de modelos:** tiers, custo do erro, gates de despacho. |
 
 ## Agents (subagentes)
 
-| Agent | Quando o Claude aciona |
-|---|---|
-| `eda-explorer` | Perfilar um dataset novo (grão, qualidade, leakage). |
-| `ml-modeler` | Construir/iterar um pipeline de modelagem correto. |
-| `stats-reviewer` | Revisar análise/experimento de forma adversarial. |
-| `code-reviewer` | Revisar Python/SQL antes de commitar. |
-| `sql-optimizer` | Corrigir e baratear SQL/dbt. |
-| `data-validator` | Criar/rodar validações (pandera) numa fonte. |
+| Agent | Tier | Quando o Claude aciona |
+|---|---|---|
+| `repo-scout` | haiku | Achar arquivo, símbolo ou uso no repo. |
+| `test-runner` | haiku | Rodar ruff/mypy/pytest e devolver a saída real. |
+| `data-profiler` | haiku | Levantar os números de um dataset (não interpreta). |
+| `code-reviewer` | sonnet | Revisar Python/SQL antes de commitar. |
+| `sql-optimizer` | sonnet | Corrigir e baratear SQL/dbt. |
+| `data-validator` | sonnet | Criar/rodar validações (pandera) numa fonte. |
+| `eda-explorer` | opus | Interpretar um dataset novo (grão, leakage, viés). |
+| `ml-modeler` | opus | Construir/iterar um pipeline de modelagem correto. |
+| `stats-reviewer` | opus | Revisar análise/experimento de forma adversarial. |
 
 ## Skills
 
@@ -86,7 +92,51 @@ Scientists_** (artesanato de software aplicado à DS).
 
 ## Commands
 
-`/novo-projeto` · `/eda` · `/baseline` · `/revisar` · `/model-card` · `/handoff`
+`/novo-projeto` · `/eda` · `/baseline` · `/revisar` · `/model-card` · `/handoff` · `/rota`
+
+## O router de modelos
+
+O trabalho não precisa todo do modelo mais caro — mas a parte que decide o
+projeto não pode cair no mais barato. O template roteia por **dois eixos**:
+
+    tier = max(esforço, custo do erro)
+
+> Se o erro passa **em silêncio** para o entregável, não é tarefa de Haiku —
+> por mais simples que pareça.
+
+É o eixo que importa em dados. Definir o grão de um join são três linhas de
+código e é o erro mais caro do projeto; rodar `pytest` e colar a saída é Haiku
+mesmo numa base complicada, porque ali o erro aparece na hora.
+
+| Tier | Natureza | Exemplos |
+|---|---|---|
+| **Haiku** | Mecânico, erro visível na hora | buscar símbolo, rodar teste, contar nulo, extrair schema |
+| **Sonnet** | Entender código/dado, resposta verificável | code review, escrever teste, schema pandera, reescrever SQL |
+| **Opus** | Julgamento + orquestração | grão, split, leakage, métrica, A/B, handoff |
+
+**Opus é sempre o líder:** ele classifica, decide e despacha. Os agents caros
+delegam a parte mecânica — o `eda-explorer` manda o `data-profiler` levantar os
+números e gasta o próprio raciocínio interpretando-os. O barato nunca conclui;
+o caro nunca conta nulo na mão.
+
+**Como é aplicado.** Duas peças, as duas que funcionam de fato:
+
+- `hooks/routing-reminder.sh`, um hook de `UserPromptSubmit`, injeta a regra
+  antes de cada turno. (Só alguns eventos têm o stdout injetado no contexto;
+  em `PreToolUse` ele vai para o log de debug e o modelo nunca lê — um hook de
+  pré-despacho ali seria um no-op silencioso.)
+- `model:` no frontmatter de cada agent, que é declarativo e não depende de hook.
+
+`/rota <tarefa>` mostra a classificação e o despacho **sem executar**, para
+conferir o router.
+
+**Para desligar numa sessão:** `export CLAUDE_ROUTER_OFF=1` antes de abrir o
+Claude Code. As atribuições de `model:` continuam valendo.
+
+**Trade-off:** `eda-explorer`, `ml-modeler` e `stats-reviewer` eram `inherit` e
+agora são `opus` fixo. Antes, abrir a sessão em Sonnet os fazia rodar em Sonnet;
+agora custam Opus sempre. É intencional — são justamente aqueles onde o erro é
+caro e silencioso.
 
 ## Checklist por projeto novo
 
@@ -95,6 +145,8 @@ Scientists_** (artesanato de software aplicado à DS).
 - [ ] Comentei no `CLAUDE.md` as rules que **não** se aplicam a este projeto.
 - [ ] Rodei `/novo-projeto` e `uv sync && pre-commit install`.
 - [ ] Confirmei o **grão** dos dados e a cadeia **negócio → ML → métrica**.
+- [ ] Dei `chmod +x .claude/hooks/*.sh` (o bit de execução não sobrevive a cópia
+      entre Windows e WSL).
 
 ## Personalizar (e controlar custo de contexto)
 

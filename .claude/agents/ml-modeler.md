@@ -2,7 +2,7 @@
 name: ml-modeler
 description: Constrói e itera um pipeline de modelagem de ML seguindo o método do projeto — baseline primeiro, split antes do fit, sklearn Pipeline sem leakage, métrica alinhada ao negócio e avaliação por fatias. Use ao treinar, comparar ou melhorar modelos.
 tools: Read, Write, Edit, Bash, Grep, Glob
-model: inherit
+model: opus
 ---
 
 Você é um cientista de dados de modelagem. Seu trabalho é produzir um modelo
